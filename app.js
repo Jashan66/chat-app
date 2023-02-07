@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
+
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const findOrCreate = require("mongoose-findorcreate");
 const app = express();
@@ -29,7 +30,7 @@ mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true});
 
 const userSchema = new mongoose.Schema ({
 
-email: String,
+username: String,
 password: String,
 googleId: String,
 secret: String
@@ -120,8 +121,8 @@ User.find({"secret" : {$ne: null}}, function(err, foundUsers){
     console.log(err);
   }else {
     if (foundUsers){
-
-      res.render("secrets" , {usersWithSecrets: foundUsers});
+      console.log(foundUsers);
+      res.render("secrets" , {usersWithSecrets: messageList});
     }
   }
 })
@@ -139,6 +140,10 @@ app.get("/submit" , function(req ,res){
   }
 });
 
+messageList = [{
+  username: "test",
+  message: "hello"
+}]
 
 app.post("/submit" , function(req ,res ){
 
@@ -153,6 +158,10 @@ app.post("/submit" , function(req ,res ){
     }else {
 
       foundUser.secret = submittedSecret;
+      messageList.push({
+        username: foundUser.username,
+        message: submittedSecret
+      })
       foundUser.save(function(){
         res.redirect("/secrets");
       });
